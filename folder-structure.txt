@@ -1,0 +1,61 @@
+seshank-ai-labs-os/
+├── SESHANK_AI_LABS_OS.md              # Master build spec (paste Section 3 here)
+├── .env.local                         # All API keys & credentials (Section 2)
+├── vercel.json                        # Cron schedules (SMTP every 15m, IMAP every 30m)
+├── next.config.ts
+├── package.json
+├── supabase/
+│   └── schema.sql                     # Unified DB tables, Storage bucket, and RLS policies
+└── src/
+    ├── middleware.ts                  # Single-user auth gate (seshank@seshankailabs.com only)
+    ├── lib/
+    │   ├── supabase/
+    │   │   ├── client.ts              # Browser Supabase client
+    │   │   ├── server.ts              # Server Supabase client
+    │   │   └── admin.ts               # Service-role client for Vercel Crons
+    │   ├── ai/
+    │   │   ├── jev-client.ts          # Mesh API client (Noul, Choice, Score primitives)
+    │   │   ├── gemini-text.ts         # Gemini 2.5 Flash (outreach) & 2.5 Pro (content)
+    │   │   ├── gemini-image.ts        # Nano Banana 2.1 generation & multi-turn editing
+    │   │   └── groq-whisper.ts        # Groq whisper-large-v3-turbo transcription
+    │   ├── enrichment/
+    │   │   ├── waterfall.ts           # Apollo + Tavily -> Serper -> SerpAPI auto-fallback
+    │   │   ├── domain-filter.ts       # Tier-1 trusted allowlist & scraper blocklist ($0)
+    │   │   └── quota-tracker.ts       # Increments & checks api_usage_logs ceilings
+    │   ├── email/
+    │   │   ├── hostinger-smtp.ts      # Nodemailer sender (smtp.hostinger.com:465)
+    │   │   ├── hostinger-imap.ts      # ImapFlow reply & bounce detector (imap.hostinger.com:993)
+    │   │   └── timezone-window.ts     # UAE/KSA (Sun-Thu) & UK/US (Mon-Fri) 9-11:30 AM calc
+    │   └── prompts/
+    │       ├── outreach-templates.ts  # Step 1 (<65w), Step 2 Delivery, Step 3 Pilot, LI <300c
+    │       └── content-templates.ts   # LinkedIn Personal, LinkedIn Company, X single/thread
+    ├── app/
+    │   ├── layout.tsx                 # Dark-mode executive shell + 4-tab sidebar/topbar
+    │   ├── login/
+    │   │   └── page.tsx               # Locked single-user login screen
+    │   ├── page.tsx                   # Tab 1: Command Center Dashboard
+    │   ├── content/
+    │   │   └── page.tsx               # Tab 2: LinkedIn + X Content & Visual Studio
+    │   ├── leads/
+    │   │   └── page.tsx               # Tab 3: CSV Importer, Voice Lead Capture & Jev Pipeline
+    │   ├── queue/
+    │   │   └── page.tsx               # Tab 4: LinkedIn Queue, Email Queue & Brand Vault
+    │   └── api/
+    │       ├── voice/
+    │       │   └── transcribe/route.ts        # Groq Whisper endpoint + quick-lead extractor
+    │       ├── pipeline/
+    │       │   └── process-leads/route.ts     # Jev -> Waterfall -> Gemini Flash -> Jev QA
+    │       ├── content/
+    │       │   ├── generate/route.ts          # Jev Sorter -> Tavily -> Gemini Pro -> Nano Banana
+    │       │   └── edit-image/route.ts        # Multi-turn image tweak via Nano Banana 2.1
+    │       ├── email/
+    │       │   └── send-test/route.ts         # Manual single test email via Hostinger
+    │       └── cron/
+    │           ├── send-emails/route.ts       # Throttled Hostinger sender (1 email / 15m)
+    │           └── sync-imap/route.ts         # Hostinger IMAP reply/bounce auto-stopper
+    └── components/
+        ├── VoiceRecorderButton.tsx    # MediaRecorder (webm/mp4 fallback) + Groq upload
+        ├── SourceBadges.tsx           # Clickable verified Tier-1 source URL pills
+        ├── ContentVisualCard.tsx      # Image preview, style switcher, 1-line tweak & download
+        ├── LeadReviewDrawer.tsx       # Human QA drawer for leads scoring < 0.85
+        └── BrandVaultEditor.tsx       # Live editor for 3 offers + dynamic AI role playbooks

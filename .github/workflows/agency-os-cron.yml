@@ -1,0 +1,41 @@
+name: Agency OS External Cron Triggers
+
+on:
+  schedule:
+    # Daily Jev Strategy & Holiday Radar at 00:30 UTC (6:00 AM IST)
+    - cron: "30 0 * * *"
+    # Trigger every 15 minutes for email dispatch & IMAP sync
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  daily-strategy-cron:
+    name: Daily Jev Holiday Radar & Outreach Strategy
+    if: github.event.schedule == '30 0 * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Daily Strategy Cron
+        run: |
+          curl -s -X POST "${{ secrets.APP_URL }}/api/cron/daily-strategy" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json"
+
+  send-emails-cron:
+    name: Dispatch Scheduled Emails (Hostinger SMTP)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Send Emails Cron
+        run: |
+          curl -s -X POST "${{ secrets.APP_URL }}/api/cron/send-emails" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json"
+
+  sync-imap-cron:
+    name: Sync IMAP Replies and Bounces
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger IMAP Sync Cron
+        run: |
+          curl -s -X POST "${{ secrets.APP_URL }}/api/cron/sync-imap" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json"
